@@ -1,0 +1,116 @@
+- TypeScript
+    - 型别判断
+        - 型别推论（Type Inference）
+            - 没给类型，TypeScript 自行判断
+        - 型别断言（Type Assertion）
+            - 类似转型（<number>, as）
+        - 型别注记（Type Annotation）
+            - 自行声明（let A: number = 0）
+    - setTimeout、setInterval
+        - 下列两点有人说 but 线上编译器却没有需要我这么做 XD
+        - 使用 window.setTimeout、window.setInterval
+        - 返回值定义成 number | null
+    - var、let、const
+        - var
+            - 变量提升，初始化之前访问是允许的
+        - let、const 常数
+            - 有暂死区
+    - interface 协定
+        - 可以用 implements 实现
+        - 同名 interface 会合并协定（需注意）
+    - type 关键字
+        - 和 interface 相近，但不可以 extends 和 implements
+        - 可以通过 & 合并
+    - Enum（列举 or 枚举）
+        - 定义一组常量
+        - 用 let 之类的接 Enum，型别注记可以是 number or Enum（建议）
+        - 多个同名 Enum 结构会自动合并
+            - 合并时只允许第一个成员忽略初始值
+            - 合并时成员不能同名
+        - 可以使用 keyof typeof Enum 取得联合类型
+        - 反向映射 Enum[n] 可以取得定义名
+    - Promise、async、await
+        - 可以处理非同步的情况
+        - promise 用 then、catch 来处理结果和错误
+        - async、await 语法上更清楚，可以直接使用 try catch 语法
+    - event loop
+        - 分六阶段（FIFO），处理（检查）完毕 or 一定数量后才会进下一个阶段
+            - timer
+                - setTimeout、setInterval
+            - pending callbacks
+                - 非同步 api 的 callback，api 完成 callback 就会在佇列中
+            - idle、prepare
+                - Node.js 内部使用的阶段
+            - poll
+                - 阶段任务
+                    - 检查其他阶段的佇列，看要在这个阶段待多久
+                    - 处理在 poll 佇列中的事件
+                - 如没有计时器事件，此阶段有佇列事件，处理后（或一定数量），【进入下一次 event loop】
+                - 如果 poll 没事件处理，且下阶段 check 有事件，就去 check 阶段
+                - poll 和 check 都没事件，就停在这边，立即处理进入 poll 的事件
+                - 进入 poll 时，如还有 timer 事件，会在 poll 事件处理后检查 timer 是否有到期的事件，有的话，event loop 回到 timer
+            - check
+                - 可以使用 setImmediate，让事件（较不重要的）在 poll 事件处理后执行
+            - close callback
+                - Socket 相关的突发关闭事件
+        - 微任务（Micro Task）和 process.nextTick
+            - 执行绪进入一个事件循环阶段时，如果该阶段的佇列为空或每一个事件函数执行后就会检查有没有微任务，有就执行（Promise 事件就是用来产生微任务的事件）
+            - process.nextTick 可以新增任务，会在微任务之前执行
+    - 泛型
+        - 参数多型
+    - 语法糖
+        - ?
+            - 检查属性，如果不存在就返回空
+            - 参数不是必要的
+            - 三元运算
+        - ?? （A ?? B）
+            - 如果前面是 null/undefine, return 后一个值
+        - !
+            - 这个参数是一定需要的
+    - Lambda 语法
+    - commonjs、ES6
+
+- Creator
+    - drawcall
+        - 渲染图像次数
+        - 文字最终也是图像
+        - 静态合图
+            - 纹理状态（预乘、循环模式、过滤模式）、Material（材质）、Blend（混合）会打断
+        - 动态合图
+            - 图集默认不使用动态合图，可以开启 Packable 选项
+            - Creator 功能 看起来很好用
+            - 文字建议使用 BMFont
+    - lifecycle
+        - onLoad
+            - 节点首次被激活的时候，保证可以取得其他节点
+        - onEnable
+            - 第一次创建且 enabled 为 true，在 onLoad 后，start 前调用
+            - enabled、active 属性从 false 变 true
+        - start
+            - 第一次激活前调用
+            - 第一次执行 update 之前
+        - update
+            - per frame 更新前
+        - lateUpdate
+            - 动画、粒子、物理更新之后
+            - 所有组件的 update 执行后
+        - onDisable
+            - enabled、active 属性从 true 变 false
+        - onDestroy
+            - 调用 destroy() 后
+            - 当 frame 结束时统一回收组件
+    - asset bundle
+        - 简单来说就是资源分包？
+        - 相同资源有可能被不同 bundle 使用，可以调整优先度
+    - 节点事件派发（三阶段）
+        - 捕获：根节点出发，逐级向子节点传递，直到目标节点或者某个节点响应函数中终端事件传递
+        - 目标：事件在目标节点上触发
+        - 冒泡：事件由目标节点，逐级向父节点冒泡，直到到达根节点或某个节点响应函数中中断时间传递
+    - touch 传递
+        - 触控支援事件派发
+        - 同级节点不会收到【冒泡】传递的事件
+        - 不同 Canvas
+            - 触控拦截根据 Canvas 节点默认自带的 priority 属性中设置决定
+            - 优先级相同才会依据节点树的先后顺序进行
+        - 事件拦截
+            - 如有 Button、Toggle、BlockInputEvent 会停止事件冒泡
